@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Limbus Company Builds</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #ff6b6b;
+    text-align: center;
+}
+label, select {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    display: block;
+}
+#buildDisplay {
+    margin-top: 20px;
+    border: 2px solid #ff6b6b;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #1e1e1e;
+}
+#buildDisplay img {
+    width: 80px;
+    margin-right: 10px;
+    border-radius: 8px;
+}
+.character, .card {
+    display: inline-block;
+    margin: 5px;
+    text-align: center;
+}
+.character span, .card span {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+.character img, .card img {
+    transition: transform 0.3s;
+}
+.character img:hover, .card img:hover {
+    transform: scale(5);
+    cursor: pointer;
+}
+#characters, #cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.character img, .card img {
+    max-width: 100%;
+}
+
+
+</style>
+</head>
+<body>
+
+<h1>Limbus Company Status Effect Builds</h1>
+
+
+<label for="statusSelect">Choose a status effect:</label>
+<select id="statusSelect">
+    <option value="">--Select--</option>
+    <option value="Burn">Burn</option>
+    <option value="Bleed">Bleed</option>
+    <option value="Tremor">Tremor</option>
+    <option value="Rupture">Rupture</option>
+    <option value="Sinking">Sinking</option>
+    <option value="Poise">Poise</option>
+    <option value="Charge">Charge</option>
+</select>
+
+<div id="buildDisplay">
+    <h2 id="effectName"></h2>
+    <p id="effectDescription"></p>
+    <p><strong>Recommended Characters:</strong></p>
+    <div id="characters"></div>
+    <p><strong>Recommended Egos:</strong></p>
+    <div id="cards"></div>
+</div>
+
+<script>
+// Data for builds
+const statusBuilds = {
+    Burn: {
+        description: "Burn is a status effect that deals bonus fixed damage to the afflicted unit. At the end of a turn, the unit with Burn will take fixed damage equal to Burn Potency, and the Burn Count will be reduced by 1.",
+        recommendedIdentities: [
+            {name: "Dawn Sinclair", img: "https://limbuscompany.wiki.gg/images/thumb/Dawn_Office_Fixer_Sinclair_Full_Uptied.png/1000px-Dawn_Office_Fixer_Sinclair_Full_Uptied.png?71f4ac"},
+            {name: "Liu Ishmael", img: "https://limbuscompany.wiki.gg/images/thumb/Liu_Assoc._South_Section_4_Ishmael_Full_Uptied.png/498px-Liu_Assoc._South_Section_4_Ishmael_Full_Uptied.png?f12406"},
+            {name: "Liu Rodion", img: "https://limbuscompany.wiki.gg/images/thumb/Liu_Assoc._South_Section_4_Director_Rodion_Full_Uptied.png/498px-Liu_Assoc._South_Section_4_Director_Rodion_Full_Uptied.png?211675"},
+            {name: "Liu Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/Liu_Assoc._South_Section_4_Ry%C5%8Dsh%C5%AB_Full_Uptied.png/498px-Liu_Assoc._South_Section_4_Ry%C5%8Dsh%C5%AB_Full_Uptied.png?d4034b"},
+            {name: "Magical Bullet Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Lobotomy_E.G.O_Magic_Bullet_Outis_Full_Uptied.png/498px-Lobotomy_E.G.O_Magic_Bullet_Outis_Full_Uptied.png?80dd4a"},
+        ],
+        recommendedEgos: [
+            {name: "4th Match Flame Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/4th_Match_Flame_Ry%C5%8Dsh%C5%AB.png/280px-4th_Match_Flame_Ry%C5%8Dsh%C5%AB.png?d82005"},
+            {name: "Magic Bullet Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Magic_Bullet_Outis.png/280px-Magic_Bullet_Outis.png?25f443"}
+        ]
+    },
+    Bleed: {
+        description: "Bleed is a status effect that deals bonus fixed damage to the afflicted unit. For every Attack Skill Coin roll, or for every individual Clash with an Attack Skill, the unit with Bleed takes fixed damage equal to the Bleed Potency, and the Bleed Count is reduced by 1.",
+        recommendedIdentities: [
+            {name: "Ring Sang", img: "https://limbuscompany.wiki.gg/images/thumb/The_Ring_Pointillist_Student_Yi_Sang_Full_Uptied.png/1024px-The_Ring_Pointillist_Student_Yi_Sang_Full_Uptied.png?bb9840"},
+            {name: "N Corp Faust", img: "https://limbuscompany.wiki.gg/images/thumb/The_One_Who_Grips_Faust_Full_Uptied.png/498px-The_One_Who_Grips_Faust_Full_Uptied.png?b505cf"},
+            {name: "Manager Don", img: "https://limbuscompany.wiki.gg/images/thumb/The_Manager_of_La_Manchaland_Don_Quixote_Full_Uptied.png/1024px-The_Manager_of_La_Manchaland_Don_Quixote_Full_Uptied.png?1e93cb"},
+            {name: "Princess Rodion", img: "https://limbuscompany.wiki.gg/images/thumb/The_Princess_of_La_Manchaland_Rodion_Full_Uptied.png/498px-The_Princess_of_La_Manchaland_Rodion_Full_Uptied.png?203f0f"},
+            {name: "Barber Outis", img: "https://limbuscompany.wiki.gg/images/thumb/The_Barber_of_La_Manchaland_Outis_Full_Uptied.png/498px-The_Barber_of_La_Manchaland_Outis_Full_Uptied.png?bf118d"},
+            {name: "Priest Gregor", img: "https://limbuscompany.wiki.gg/images/thumb/The_Priest_of_La_Manchaland_Gregor_Full_Uptied.png/498px-The_Priest_of_La_Manchaland_Gregor_Full_Uptied.png?3e8cb6"},
+        ],
+        recommendedEgos: [
+            {name: "Contempt Awe Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/Contempt%2C_Awe_Ry%C5%8Dsh%C5%AB.png/280px-Contempt%2C_Awe_Ry%C5%8Dsh%C5%AB.png?263ae7"},
+            {name: "Don Yearning Mircalla", img: "https://limbuscompany.wiki.gg/images/thumb/Yearning-Mircalla_Don_Quixote.png/280px-Yearning-Mircalla_Don_Quixote.png?48747f"},
+            {name: "Sanguire Desire Rodion", img: "https://limbuscompany.wiki.gg/images/thumb/Sanguine_Desire_Rodion.png/280px-Sanguine_Desire_Rodion.png?f3a18c"},
+        ]
+    },
+    Tremor: {
+        description: "Tremor is a Status Effect that will raise the Stagger Threshold of an afflicted unit equal to the Tremor Potency on Tremor Burst.Tremor Count decreases by 1 at turn end, and may be decreased by Skills that trigger Tremor Burst.",
+        recommendedIdentities: [
+            {name: "T Corp Don", img: "https://limbuscompany.wiki.gg/images/thumb/T_Corp._Class_3_Collection_Staff_Don_Quixote_Full_Uptied.png/498px-T_Corp._Class_3_Collection_Staff_Don_Quixote_Full_Uptied.png?4633f6"},
+            {name: "Rosepanner Rodion", img: "https://limbuscompany.wiki.gg/images/thumb/Rosespanner_Workshop_Rep_Rodion_Full_Uptied.png/498px-Rosespanner_Workshop_Rep_Rodion_Full_Uptied.png?16cce1"},
+            {name: "Yurodivy Hong Lu", img: "https://limbuscompany.wiki.gg/images/thumb/District_20_Yurodivy_Hong_Lu_Full_Uptied.png/1024px-District_20_Yurodivy_Hong_Lu_Full_Uptied.png?f03cc5"},
+            {name: "Regret Faust", img: "https://limbuscompany.wiki.gg/images/thumb/Lobotomy_E.G.O_Regret_Faust_Full_Uptied.png/498px-Lobotomy_E.G.O_Regret_Faust_Full_Uptied.png?3a93aa"},
+            {name: "Molar Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Molar_Office_Fixer_Outis_Full_Uptied.png/498px-Molar_Office_Fixer_Outis_Full_Uptied.png?f6e6eb"},
+            {name: "Oufi Heathercliff", img: "https://limbuscompany.wiki.gg/images/thumb/%C3%96ufi_Assoc._South_Section_3_Heathcliff_Full_Uptied.png/498px-%C3%96ufi_Assoc._South_Section_3_Heathcliff_Full_Uptied.png?810cec"},
+        ],
+        recommendedEgos: [
+            {name: "Everlasting Faust", img: "https://limbuscompany.wiki.gg/images/thumb/Everlasting_Faust.png/280px-Everlasting_Faust.png?8baf69"},
+            {name: "Cavernous Wailing Hong Lu", img: "https://limbuscompany.wiki.gg/images/thumb/Cavernous_Wailing_Hong_Lu.png/280px-Cavernous_Wailing_Hong_Lu.png?992877"},
+        ]
+    },
+    Rupture: {
+        description: "Rupture is a status effect that deals bonus fixed damage to the afflicted unit. When hit, the unit with Rupture will take damage equal to the Rupture Potency, and the Rupture Count will be reduced by 1.",
+        recommendedIdentities: [
+            {name: "Lord of Hongyuan", img: "https://limbuscompany.wiki.gg/images/thumb/The_Lord_of_Hongyuan_Hong_Lu_Full_Uptied.png/1024px-The_Lord_of_Hongyuan_Hong_Lu_Full_Uptied.png?89a2b2"},
+            {name: "Mao Faust", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_Mao_Branch_Adept_Faust_Full_Uptied.png/498px-Heishou_Pack_-_Mao_Branch_Adept_Faust_Full_Uptied.png?497787"},
+            {name: "Mao Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_Mao_Branch_Outis_Full_Uptied.png/498px-Heishou_Pack_-_Mao_Branch_Outis_Full_Uptied.png?6c0e1f"},
+            {name: "Mao Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_Mao_Branch_Ry%C5%8Dsh%C5%AB_Full_Uptied.png/498px-Heishou_Pack_-_Mao_Branch_Ry%C5%8Dsh%C5%AB_Full_Uptied.png?376b74"},
+            {name: "Si Gregor", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_Si_Branch_Gregor_Full_Uptied.png/498px-Heishou_Pack_-_Si_Branch_Gregor_Full_Uptied.png?d7d0d1"},
+            {name: "Si Rodion", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_Si_Branch_Rodion_Full_Uptied.png/1000px-Heishou_Pack_-_Si_Branch_Rodion_Full_Uptied.png?42bd82"},
+            {name: "Yao Sinclair", img: "https://limbuscompany.wiki.gg/images/thumb/Heishou_Pack_-_You_Branch_Sinclair_Full.png/498px-Heishou_Pack_-_You_Branch_Sinclair_Full.png?ba1fd5"},
+        ],  
+        recommendedEgos: [
+            {name: "Tears of the Tarnised Blood Hong Lu", img: "https://limbuscompany.wiki.gg/images/thumb/Tears_of_the_Tarnished_Blood_%E6%B1%9A%E8%A1%80%E6%B3%A3%E6%B7%9A_Hong_Lu.png/280px-Tears_of_the_Tarnished_Blood_%E6%B1%9A%E8%A1%80%E6%B3%A3%E6%B7%9A_Hong_Lu.png?8e4319"},
+            {name: "Red Sheet Don Quioxte", img: "https://limbuscompany.wiki.gg/images/thumb/Red_Sheet_Don_Quixote.png/280px-Red_Sheet_Don_Quixote.png?e1676e"}
+        ]
+    },
+    Sinking: {
+        description: "Sinking is a status effect that deals bonus Sanity (SP) damage to the afflicted unit. When hit, the unit with Sinking will take SP damage equal to the Sinking Potency, and Sinking Count will be reduced by 1. Units with no SP (such as Abnormalities) will take fixed damage equal to the Sinking Potency instead.",
+        recommendedIdentities: [
+            {name: "Solemn Lament Yi sang", img: "https://limbuscompany.wiki.gg/images/thumb/Lobotomy_E.G.O_Solemn_Lament_Yi_Sang_Full_Uptied.png/498px-Lobotomy_E.G.O_Solemn_Lament_Yi_Sang_Full_Uptied.png?741d31"},
+            {name: "Wild Hunt", img: "https://limbuscompany.wiki.gg/images/thumb/Wild_Hunt_Heathcliff_Full_Uptied.png/1000px-Wild_Hunt_Heathcliff_Full_Uptied.png?37f62c"},
+            {name: "Molar Boatwork Ishmael", img: "https://limbuscompany.wiki.gg/images/thumb/Molar_Boatworks_Fixer_Ishmael_Full_Uptied.png/498px-Molar_Boatworks_Fixer_Ishmael_Full_Uptied.png?c6ce25"},
+            {name: "Butler Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Wuthering_Heights_Chief_Butler_Outis_Full_Uptied.png/498px-Wuthering_Heights_Chief_Butler_Outis_Full_Uptied.png?395c45"},
+            {name: "Butler Faust", img: "https://limbuscompany.wiki.gg/images/thumb/Wuthering_Heights_Butler_Faust_Full_Uptied.png/498px-Wuthering_Heights_Butler_Faust_Full_Uptied.png?64781f"},
+            {name: "Edgar Family Heir", img: "https://limbuscompany.wiki.gg/images/thumb/Edgar_Family_Heir_Gregor_Full_Uptied.png/498px-Edgar_Family_Heir_Gregor_Full_Uptied.png?fdbc92"},
+        ],
+        recommendedEgos: [
+            {name: "Bygone Days Yi Sang", img: "https://limbuscompany.wiki.gg/images/thumb/Bygone_Days_Yi_Sang.png/280px-Bygone_Days_Yi_Sang.png?1a07f7"},
+        ]
+    },
+    Poise: {
+        description: "Poise is a Status Effect that is gained through Skills and gives attacks a chance to deal a Critical Hit, increasing damage dealt by 20%. The chance for a Critical Hit is dependent on Poise Potency (Crit chance = (Potency * 5)%), while Poise Count decreases by 1 on a Critical Hit (identical timing as On Hit) and by 1 at Turn End.",
+        recommendedIdentities: [
+            {name: "Blade Lineage Merusault", img: "https://limbuscompany.wiki.gg/images/thumb/Blade_Lineage_Mentor_Meursault_Full_Uptied.png/1000px-Blade_Lineage_Mentor_Meursault_Full_Uptied.png?3d8478"},
+            {name: "Blade Lineage Yi Sang", img: "https://limbuscompany.wiki.gg/images/thumb/Blade_Lineage_Salsu_Yi_Sang_Full_Uptied.png/498px-Blade_Lineage_Salsu_Yi_Sang_Full_Uptied.png?209d77"},
+            {name: "Captain Ishmael", img: "https://limbuscompany.wiki.gg/images/thumb/The_Pequod_Captain_Ishmael_Full_Uptied.png/1000px-The_Pequod_Captain_Ishmael_Full_Uptied.png?ec7557"},
+            {name: "Butler Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/Edgar_Family_Chief_Butler_Ry%C5%8Dsh%C5%AB_Full_Uptied.png/498px-Edgar_Family_Chief_Butler_Ry%C5%8Dsh%C5%AB_Full_Uptied.png?9aefb3"},
+            {name: "Cinq Sinclair", img: "https://limbuscompany.wiki.gg/images/thumb/Cinq_Assoc._South_Section_4_Director_Sinclair_Full_Uptied.png/498px-Cinq_Assoc._South_Section_4_Director_Sinclair_Full_Uptied.png?ea159e"},
+        ],
+        recommendedEgos: [
+            {name: "Blind Obsession Ishmael", img: "https://limbuscompany.wiki.gg/images/thumb/Blind_Obsession_Ishmael.png/280px-Blind_Obsession_Ishmael.png?8404c5"},
+            {name: "Fell Bullet Yi Sang", img: "https://limbuscompany.wiki.gg/images/thumb/Fell_Bullet_Yi_Sang.png/280px-Fell_Bullet_Yi_Sang.png?cf7193"},
+            {name: "Wishing Cairn Don", img: "https://limbuscompany.wiki.gg/images/thumb/Wishing_Cairn_Don_Quixote.png/280px-Wishing_Cairn_Don_Quixote.png?392e96"},
+        ]
+    },
+    Charge: {
+        description: "Charge is a Status Effect that is gained through various skills and is spent to improve skill effects. Charge Count decreases by 1 at the end of each turn. Most Charge users only use Charge Count, while some also gain Charge Potency by spending Charge Count and use it for additional skill effects.",
+        recommendedIdentities: [
+            {name: "W Corp Don", img: "https://limbuscompany.wiki.gg/images/thumb/W_Corp._L3_Cleanup_Agent_Don_Quixote_Full_Uptied.png/498px-W_Corp._L3_Cleanup_Agent_Don_Quixote_Full_Uptied.png?1f04e0"},
+            {name: "W Corp Ryoshu", img: "https://limbuscompany.wiki.gg/images/thumb/W_Corp._L3_Cleanup_Agent_Ry%C5%8Dsh%C5%AB_Full_Uptied.png/1000px-W_Corp._L3_Cleanup_Agent_Ry%C5%8Dsh%C5%AB_Full_Uptied.png?7ed170"},
+            {name: "Multi Crack Faust", img: "https://limbuscompany.wiki.gg/images/thumb/MultiCrack_Office_Rep_Faust_Full_Uptied.png/498px-MultiCrack_Office_Rep_Faust_Full_Uptied.png?7b1ecd"},
+            {name: "W Corp Outis", img: "https://limbuscompany.wiki.gg/images/thumb/W_Corp._L3_Cleanup_Captain_Outis_Full_Uptied.png/498px-W_Corp._L3_Cleanup_Captain_Outis_Full_Uptied.png?62a8bf"},
+        ],
+        recommendedEgos: [
+            {name: "Telepole Don", img: "https://limbuscompany.wiki.gg/images/thumb/Telepole_Don_Quixote.png/280px-Telepole_Don_Quixote.png?8c8232"},
+            {name: "Dimension Shredder Outis", img: "https://limbuscompany.wiki.gg/images/thumb/Dimension_Shredder_Outis.png/280px-Dimension_Shredder_Outis.png?4b0906"}
+        ]
+    }
+};
+
+// Elements
+const statusSelect = document.getElementById("statusSelect");
+const effectName = document.getElementById("effectName");
+const effectDescription = document.getElementById("effectDescription");
+const charactersDiv = document.getElementById("characters");
+const cardsDiv = document.getElementById("cards");
+
+// Event listener
+statusSelect.addEventListener("change", () => {
+    const selected = statusSelect.value;
+    
+    if (selected && statusBuilds[selected]) {
+        const build = statusBuilds[selected];
+        effectName.textContent = selected;
+        effectDescription.textContent = build.description;
+
+        // Characters
+        charactersDiv.innerHTML = "";
+        build.recommendedIdentities.forEach(c => {
+            const div = document.createElement("div");
+            div.className = "character";
+            div.innerHTML = `<img src="${c.img}" alt="${c.name}"><span>${c.name}</span>`;
+            charactersDiv.appendChild(div);
+        });
+
+        // Cards
+        cardsDiv.innerHTML = "";
+        build.recommendedEgos.forEach(c => {
+            const div = document.createElement("div");
+            div.className = "card";
+            div.innerHTML = `<img src="${c.img}" alt="${c.name}"><span>${c.name}</span>`;
+            cardsDiv.appendChild(div);
+        });
+
+    } else {
+        effectName.textContent = "";
+        effectDescription.textContent = "";
+        charactersDiv.innerHTML = "";
+        cardsDiv.innerHTML = "";
+    }
+});
+</script>
+</body>
+</html>
